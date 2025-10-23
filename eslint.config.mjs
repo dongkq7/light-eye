@@ -33,9 +33,10 @@ const frontendConfig = {
   rules: {
     ...reactHooks.configs.recommended.rules,
     'react-refresh/only-export-components': [
+      // 要求文件只导出 React 组件
       'warn',
       {
-        allowConstantExport: true
+        allowConstantExport: true // 允许导出常量
       }
     ]
   }
@@ -46,7 +47,7 @@ const backendConfig = {
   files: ['apps/backend/**/*.{js,ts}'],
   languageOptions: {
     globals: {
-      ...globals.node
+      ...globals.node // 允许使用node相关的全局变量
     },
     parser: tseslint.parser
   },
@@ -74,7 +75,7 @@ export default tseslint.config(
     extends: [eslint.configs.recommended, ...tseslint.configs.recommended], // 继承一些配置
     plugins: {
       prettier: eslintPrettier
-      // "simple-import-sort": importSort
+      // 'simple-import-sort': importSort
     },
     // 自定义规则
     rules: {
