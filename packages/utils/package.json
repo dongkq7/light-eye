@@ -1,5 +1,5 @@
 {
-  "name": "@light-eye/browser-utils",
+  "name": "@light-eye/utils",
   "version": "1.0.0",
   "description": "",
   "main": "build/cjs/index.js",
@@ -24,10 +24,7 @@
     "build:watch:types": "tsc -p tsconfig.types.json --watch",
     "build": "pnpm run build:transpile & pnpm run build:types",
     "build:transpile": "tsup",
-    "build:types": "tsc -p tsconfig.types.json",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "build:types": "tsc -p tsconfig.types.json"
   },
   "keywords": [],
   "author": "",
