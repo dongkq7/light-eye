@@ -31,6 +31,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
-    "@light-eye/core": "workspace:*"
+    "@light-eye/core": "workspace:*",
+    "@light-eye/browser-utils": "workspace:*"
   }
 }

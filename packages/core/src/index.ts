@@ -1,3 +1,3 @@
-export type { Integration } from './types'
-export type { Transport } from './transport'
-export { Monitor, getTransport } from './monitor'
+export * from './types'
+export * from './monitor'
+export * from './transport'

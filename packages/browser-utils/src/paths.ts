@@ -44,15 +44,7 @@ export const getComposedPath = (e: Event): string[] => {
     .slice(2)
     .map(el => {
       const element = el as HTMLElement
-      let selector = element.tagName?.toLowerCase() || ''
-      if (element.id) {
-        selector += `#${element.id}`
-      }
-      if (element.className) {
-        selector += `.${(element.className as string).replace(/\s+/g, '.')}`
-      }
-
-      return selector
+      return getElementSelector(element)
     })
 }
 
@@ -65,4 +57,20 @@ export const getPaths = (e: Event): string => {
   if (!e) return ''
   const composedPath = getComposedPath(e)
   return composedPath.join(' > ')
+}
+
+/**
+ *
+ */
+export function getElementSelector(element: HTMLElement | null): string {
+  if (!element) return ''
+  let selector = element.tagName?.toLowerCase() || ''
+  if (element.id) {
+    selector += `#${element.id}`
+  }
+  if (element.className) {
+    selector += `.${(element.className as string).replace(/\s+/g, '.')}`
+  }
+
+  return selector
 }

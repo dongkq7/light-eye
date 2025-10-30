@@ -1,4 +1,32 @@
-import { Transport } from '../transport'
+export interface MonitorOptions {
+  dsn: string // 数据源地址
+  integrations?: Integration[] // 集成的插件
+  transportOptions?: TransportOptions // transport配置
+  eventTracker?: EventTrackerConfig // 事件追踪配置
+}
+
+export interface TransportOptions {
+  dsn: string
+  bufferSize?: number // 批量发送阈值
+  bufferDelay?: number // 批量发送延迟事件
+  maxRetries?: number // 最大重试次数
+  useBatch?: boolean // 是否批量发送
+}
+
+export interface EventTrackerConfig {
+  enabled?: boolean // 是否启用事件追踪
+  timeout?: number // 事件有效期（毫秒）
+  meaningfulEvents?: string[] // 有意义的事件类型
+  maxEvents?: number // 最大事件记录数
+  captureEvents?: string[] // 要捕获的事件类型
+}
+
+export interface Transport {
+  send(data: any): void
+  flush(): Promise<void>
+  destroy(): void
+}
+
 export type ErrorType =
   | 'runtime_error'
   | 'promise_rejection'
@@ -17,17 +45,7 @@ export interface ErrorData {
   [key: string]: any
 }
 
-export interface IIntegration {
+export interface Integration {
+  name: string
   init(transport: Transport): void
-}
-
-export class Integration implements IIntegration {
-  transport: Transport | null = null
-  init(transport: Transport): void {
-    this.transport = transport
-  }
-}
-export interface MonitorOptions {
-  dsn: string // 数据源地址
-  integrations?: IIntegration[] // 集成的插件
 }

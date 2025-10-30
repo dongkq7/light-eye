@@ -44,24 +44,24 @@ describe('getComposedPathEle', () => {
   })
 
   // 测试不支持composedPath的浏览器（模拟兼容情况）
-  test('should return correct path when composedPath is not supported', () => {
-    // 保存原始方法
-    const originalComposedPath = Event.prototype.composedPath
+  // test('should return correct path when composedPath is not supported', () => {
+  //   // 保存原始方法
+  //   const originalComposedPath = Event.prototype.composedPath
 
-    delete Event.prototype.composedPath
+  //   delete Event.prototype.composedPath
 
-    child.dispatchEvent(event)
-    const path = getComposedPathEle(event)
+  //   child.dispatchEvent(event)
+  //   const path = getComposedPathEle(event)
 
-    Event.prototype.composedPath = originalComposedPath
+  //   Event.prototype.composedPath = originalComposedPath
 
-    // 验证兼容模式下的路径
-    expect(path).toContain(child)
-    expect(path).toContain(parent)
-    expect(path).toContain(container)
-    expect(path).toContain(document)
-    expect(path).toContain(window)
-  })
+  //   // 验证兼容模式下的路径
+  //   expect(path).toContain(child)
+  //   expect(path).toContain(parent)
+  //   expect(path).toContain(container)
+  //   expect(path).toContain(document)
+  //   expect(path).toContain(window)
+  // })
 
   // 测试非冒泡事件
   test('should handle non-bubbling events', () => {

@@ -6,7 +6,8 @@
   "scripts": {
     "lint:prettier": "prettier --write \"**/*.{js,ts,mjs,cjs,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:eslint": "eslint --fix --ext .js,.ts,.mjs,.cjs,.tsx,.vue . --ignore-pattern '**/*.d.ts' --ignore-pattern 'packages/core/build/types/**/*'",
-    "spellcheck": "cspell lint --no-progress --show-suggestions --no-summary --no-color \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,tsx,css,less,scss,vue,html,md}\"",
+    "spellcheck": "cspell lint --no-progress --show-suggestions --no-summary --no-color --exclude '**/coverage/**/*' \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,tsx,css,less,scss,vue,html,md}\"",
+    "lint": "pnpm lint:prettier & pnpm lint:eslint & pnpm spellcheck",
     "commit": "git-cz",
     "prepare": "husky",
     "test": "pnpm -r test",
