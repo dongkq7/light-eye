@@ -35,6 +35,7 @@
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@light-eye/core": "workspace:*",
-    "@light-eye/browser-utils": "workspace:*"
+    "@light-eye/browser-utils": "workspace:*",
+    "@light-eye/utils": "workspace:*"
   }
 }

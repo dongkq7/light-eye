@@ -108,6 +108,9 @@ importers:
       '@light-eye/core':
         specifier: workspace:*
         version: link:../core
+      '@light-eye/utils':
+        specifier: workspace:*
+        version: link:../utils
 
   packages/browser-utils:
     dependencies:

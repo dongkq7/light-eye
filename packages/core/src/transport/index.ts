@@ -9,8 +9,8 @@ export abstract class BaseTransport implements Transport {
 
   constructor(options: TransportOptions) {
     this.options = {
-      bufferSize: 10,
-      bufferDelay: 1000,
+      bufferSize: 10, // 最大缓存数量
+      bufferDelay: 1000, // 发送延迟时间
       maxRetries: 3,
       useBatch: true,
       ...options
@@ -24,10 +24,10 @@ export abstract class BaseTransport implements Transport {
   abstract destroy(): void
 
   /**
-   * 发送数据 - 统一使用CachePool
+   * 发送数据 - 统一使用CachePool来缓存并判断是否触发发送
    */
   protected sendData(data: any): void {
-    const eventType = data.event_type || 'default'
+    const eventType = data.event_type || 'unknown'
 
     // 添加到缓存池
     this.cachePool.addCache(eventType, data)
@@ -57,6 +57,7 @@ export abstract class BaseTransport implements Transport {
     if (!this.flushTimer) {
       this.flushTimer = window.setTimeout(() => {
         this.flush()
+        this.flushTimer = null
       }, this.options.bufferDelay)
     }
   }
@@ -65,17 +66,22 @@ export abstract class BaseTransport implements Transport {
    * 刷新指定类型的数据
    */
   protected async flushType(type: string): Promise<void> {
+    if (this.isSending) return
+
     const data = this.cachePool.takeCache(type)
-    if (data.length > 0 && !this.isSending) {
+    if (data.length > 0) {
       await this.sendBatch(data, type)
     }
   }
 
   /**
-   * 发送批次数据
+   * 发送批次数据，具体逻辑子类去实现
    */
   protected abstract sendBatch(data: any[], type: string): Promise<void>
 
+  /**
+   * 生成唯一请求ID
+   */
   protected generateRequestId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
   }
