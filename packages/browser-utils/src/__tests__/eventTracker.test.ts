@@ -1,6 +1,5 @@
 import {
   clearEvents,
-  defaultEventTracker,
   EventTracker,
   getEventTrackerStats,
   getLastEvent,
@@ -23,31 +22,37 @@ jest.mock('../paths', () => ({
   })
 }))
 
-describe('EventTracker', () => {
-  let tracker: EventTracker
+describe('EventTracker (Singleton)', () => {
+  // 单例模式下，通过 getInstance 获取实例
+  const getTracker = () => EventTracker.getInstance()
 
+  // 每次测试前重置单例和状态
   beforeEach(() => {
-    tracker = new EventTracker()
-    tracker.destroy()
+    // 调用 destroy 重置单例
+    getTracker().destroy()
+    // 重新获取实例（确保是新实例）
+    const newTracker = getTracker()
+    // 手动清空事件
+    newTracker.clear()
+    // 验证初始状态为空
+    expect(newTracker.getRecentEvents().length).toBe(0)
     ;(getElementSelector as jest.Mock).mockClear()
+    jest.clearAllMocks()
+  })
+
+  // 测试单例唯一性
+  test('should be a singleton (only one instance)', () => {
+    const tracker1 = EventTracker.getInstance()
+    const tracker2 = EventTracker.getInstance()
+    expect(tracker1).toBe(tracker2) // 同一实例
   })
 
   // 测试默认配置
   test('should use default config when no custom config is provided', () => {
+    const tracker = getTracker()
     expect(tracker.getConfig()).toEqual({
       enabled: true,
       timeout: 5000,
-      meaningfulEvents: [
-        'click',
-        'mousedown',
-        'keydown',
-        'keyup',
-        'submit',
-        'change',
-        'input',
-        'touchstart',
-        'touchend'
-      ],
       maxEvents: 10,
       captureEvents: [
         'click',
@@ -68,53 +73,68 @@ describe('EventTracker', () => {
     })
   })
 
-  // 测试初始化逻辑
-  test('should initialize event listeners when init() is called', () => {
+  // 测试初始化逻辑（防止重复初始化）
+  test('should initialize event listeners only once', () => {
     const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
+    const tracker = getTracker()
+
     tracker.init()
-    expect(tracker.getConfig().enabled).toBe(true)
+    tracker.init() // 第二次调用应被忽略
     expect(tracker['isInitialized']).toBe(true)
+    // 验证事件监听只绑定一次（次数等于 captureEvents 长度）
     expect(addEventListenerSpy).toHaveBeenCalledTimes(tracker.getConfig()!.captureEvents!.length)
-    // 恢复被模拟的原生方法
     addEventListenerSpy.mockRestore()
   })
 
   // 测试事件捕获记录
-  test('should track meaningful events and ignore non-meaningful ones', () => {
+  test('should track all events in captureEvents', () => {
+    const tracker = EventTracker.getInstance({
+      captureEvents: ['click', 'scroll']
+    })
     tracker.init()
 
-    const clickEvent = new Event('click')
-    document.dispatchEvent(clickEvent)
+    // 触发事件
+    document.dispatchEvent(new Event('click'))
+    document.dispatchEvent(new Event('scroll'))
 
-    // 触发一个无意义的事件
-    const scrollEvent = new Event('scroll')
-    document.dispatchEvent(scrollEvent)
+    // 此时只会记录这两个事件
+    expect(tracker.getRecentEvents().length).toBe(2)
+    expect(tracker.getRecentEvents()[0]!.type).toBe('scroll')
+    expect(tracker.getRecentEvents()[1]!.type).toBe('click')
+  })
 
-    expect(tracker.getLastEvent()?.type).toBe('click')
+  test('should only track events in custom captureEvents', () => {
+    // 自定义配置：只监听 click 事件
+    const tracker = EventTracker.getInstance({
+      captureEvents: ['click']
+    })
+    tracker.init()
+
+    // 触发 click（会被记录）和 scroll（不在配置中，不记录）
+    document.dispatchEvent(new Event('click'))
+    document.dispatchEvent(new Event('scroll'))
+
     expect(tracker.getRecentEvents().length).toBe(1)
-    expect(tracker.getStats().totalEvents).toBe(1)
+    expect(tracker.getLastEvent()?.type).toBe('click')
   })
 
   // 测试事件过期清理
   test('should cleanup expired events based on timeout', () => {
-    tracker = new EventTracker({ timeout: 100 })
+    // 通过 getInstance 传入自定义配置（超时 100ms）
+    const tracker = EventTracker.getInstance({ timeout: 100 })
     tracker.init()
 
-    const clickEvent = new Event('click')
-    document.dispatchEvent(clickEvent)
-    // 快进时间（Jest 时间模拟）
+    document.dispatchEvent(new Event('click'))
     jest.useFakeTimers()
-    jest.advanceTimersByTime(200) // 超过 100ms 超时时间
-    // 验证过期事件被清理
-    expect(tracker.getLastEvent()).toBeNull()
+    jest.advanceTimersByTime(200) // 超过超时时间
+    expect(tracker.getLastEvent()).toBeNull() // 事件已过期
     expect(tracker.getRecentEvents().length).toBe(0)
     jest.useRealTimers()
   })
 
   // 测试事件数量限制
   test('should limit events to maxEvents config', () => {
-    // 限制最大事件数为 2
-    tracker = new EventTracker({ maxEvents: 2 })
+    const tracker = EventTracker.getInstance({ maxEvents: 2 })
     tracker.init()
 
     // 触发 3 个事件
@@ -122,40 +142,29 @@ describe('EventTracker', () => {
     document.dispatchEvent(new Event('keydown'))
     document.dispatchEvent(new Event('submit'))
 
-    // 验证只保留最新的 2 个
+    // 只保留最新的 2 个
     expect(tracker.getRecentEvents().length).toBe(2)
-    expect(tracker.getRecentEvents()![0]?.type).toBe('submit') // 最新的事件在最前
-    expect(tracker.getRecentEvents()![1]?.type).toBe('keydown')
+    expect(tracker.getRecentEvents()[0]!.type).toBe('submit') // 最新事件在最前
+    expect(tracker.getRecentEvents()[1]!.type).toBe('keydown')
   })
 
-  // 测试获取最近事件的格式化输出
+  // 测试最近事件的格式化输出
   test('should format recent events with type, timestamp and target', () => {
+    const tracker = getTracker()
     tracker.init()
 
     const button = document.createElement('button')
     button.id = 'test-btn'
     document.body.appendChild(button)
 
-    // const clickEvent = new MouseEvent('click')
-
-    // button.dispatchEvent(clickEvent)
-    // 1. 创建基础事件（不指定 target）
-    const clickEvent = new MouseEvent('click', {
-      bubbles: true, // 可选：根据需要设置事件是否冒泡
-      cancelable: true
-    })
-
-    // 2. 手动给事件对象添加 target 属性（绕开类型检查）
-    Object.defineProperty(clickEvent, 'target', {
-      value: button,
-      writable: false // 模拟浏览器中 target 的只读特性
-    })
-
-    // 触发事件
+    // 触发带 target 的点击事件
+    const clickEvent = new MouseEvent('click', { bubbles: true })
+    Object.defineProperty(clickEvent, 'target', { value: button })
     document.dispatchEvent(clickEvent)
+
     const recentEvents = tracker.getRecentEvents()
     expect(recentEvents[0]!.type).toBe('click')
-    expect(recentEvents[0]!.target).toBe('button#test-btn') // 验证 getElementSelector 被调用
+    expect(recentEvents[0]!.target).toBe('button#test-btn') // 匹配 selector 逻辑
     expect(typeof recentEvents[0]!.timestamp).toBe('number')
 
     document.body.removeChild(button)
@@ -163,41 +172,41 @@ describe('EventTracker', () => {
 
   // 测试禁用状态
   test('should not track events when enabled is false', () => {
-    tracker = new EventTracker({ enabled: false })
+    const tracker = EventTracker.getInstance({ enabled: false })
     tracker.init()
 
     document.dispatchEvent(new Event('click'))
+    expect(tracker.getRecentEvents().length).toBe(0)
     expect(tracker.getLastEvent()).toBeNull()
     expect(tracker.getStats().enabled).toBe(false)
-    expect(tracker.getRecentEvents().length).toBe(0)
   })
 
   // 测试清空事件
   test('should clear all events when clear() is called', () => {
+    const tracker = getTracker()
     tracker.init()
     document.dispatchEvent(new Event('click'))
     expect(tracker.getLastEvent()).not.toBeNull()
 
-    tracker.clear()
+    clearEvents() // 调用便捷函数
     expect(tracker.getLastEvent()).toBeNull()
     expect(tracker.getRecentEvents().length).toBe(0)
   })
 
   // 测试更新配置
   test('should update config when updateConfig() is called', () => {
+    const tracker = getTracker()
     tracker.updateConfig({ enabled: false, timeout: 10000 })
     expect(tracker.getConfig().enabled).toBe(false)
     expect(tracker.getConfig().timeout).toBe(10000)
   })
-  // 测试默认实例及便捷函数
-  test('should work with default instance and utility functions', () => {
-    // 重置默认实例
-    defaultEventTracker.destroy()
-    defaultEventTracker.init()
 
-    // 用便捷函数触发事件并验证
+  // 测试便捷函数与单例的一致性
+  test('utility functions should work with the singleton instance', () => {
+    initEventTracker() // 初始化单例
+
     document.dispatchEvent(new Event('keydown'))
-    expect(getLastEvent()?.type).toBe('keydown')
+    expect(getLastEvent()?.type).toBe('keydown') // 便捷函数获取单例数据
     expect(getRecentEvents()[0]!.type).toBe('keydown')
     expect(getEventTrackerStats().totalEvents).toBe(1)
 
@@ -205,13 +214,16 @@ describe('EventTracker', () => {
     expect(getLastEvent()).toBeNull()
   })
 
-  // 测试 initEventTracker 工厂函数
-  test('should create a new tracker with custom config via initEventTracker', () => {
-    const customTracker = initEventTracker({ maxEvents: 5 })
-    expect(customTracker.getConfig().maxEvents).toBe(5)
-    expect(customTracker['isInitialized']).toBe(true)
+  // 测试 initEventTracker 工厂函数（更新单例配置）
+  test('initEventTracker should update singleton config', () => {
+    // 第一次调用：创建单例并传入配置
+    const tracker1 = initEventTracker({ maxEvents: 5 })
+    expect(tracker1.getConfig().maxEvents).toBe(5)
+    expect(tracker1['isInitialized']).toBe(true)
 
-    const customTrackerDefaultConfig = initEventTracker()
-    expect(customTrackerDefaultConfig.getConfig().maxEvents).toBe(10)
+    // 第二次调用：更新单例配置
+    const tracker2 = initEventTracker({ maxEvents: 8 })
+    expect(tracker2.getConfig().maxEvents).toBe(8)
+    expect(tracker1).toBe(tracker2) // 仍是同一个单例
   })
 })

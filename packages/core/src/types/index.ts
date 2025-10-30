@@ -16,7 +16,6 @@ export interface TransportOptions {
 export interface EventTrackerConfig {
   enabled?: boolean // 是否启用事件追踪
   timeout?: number // 事件有效期（毫秒）
-  meaningfulEvents?: string[] // 有意义的事件类型
   maxEvents?: number // 最大事件记录数
   captureEvents?: string[] // 要捕获的事件类型
 }

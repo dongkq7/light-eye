@@ -63,7 +63,6 @@ export const getPaths = (e: Event): string => {
  * 获取元素选择器
  */
 export function getElementSelector(element: HTMLElement | null): string {
-  console.log('getElementSelector=>=>=>', element)
   if (!element) return ''
   let selector = element.tagName?.toLowerCase() || ''
   if (element.id) {

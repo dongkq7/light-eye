@@ -1,9 +1,2 @@
-export {
-  EventTracker,
-  defaultEventTracker,
-  initEventTracker,
-  getLastEvent,
-  getRecentEvents,
-  clearEvents
-} from './eventTracker'
+export { EventTracker, initEventTracker, getLastEvent, getRecentEvents, clearEvents } from './eventTracker'
 export * from './paths'
