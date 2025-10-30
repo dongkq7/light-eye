@@ -4,6 +4,10 @@ import { Errors } from './tracing/errors'
 import { initEventTracker } from '@light-eye/browser-utils'
 
 export const init = (options: MonitorOptions) => {
+  if (!options.dsn) {
+    console.warn('⚠️ Please config dsn')
+    return
+  }
   // 从options中获取事件追踪配置
   const eventTrackerConfig = options.eventTracker || {}
 

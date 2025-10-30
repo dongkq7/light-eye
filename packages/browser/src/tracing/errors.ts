@@ -1,5 +1,5 @@
 import { Transport, Integration } from '@light-eye/core'
-import { getLastEvent, getRecentEvents, getPaths } from '@light-eye/browser-utils'
+import { getLastEvent, getRecentEvents, getPaths, getElementSelector } from '@light-eye/browser-utils'
 /**
  * // 错误上报数据示例
 {
@@ -34,50 +34,71 @@ import { getLastEvent, getRecentEvents, getPaths } from '@light-eye/browser-util
  */
 export class Errors implements Integration {
   public name = 'Errors'
-  private originalConsoleError?: typeof console.error
-
+  // 保存事件监听器引用，方便销毁时移除
+  private globalErrorHandler: ((e: ErrorEvent) => void) | null = null
+  private rejectionHandler: ((e: PromiseRejectionEvent) => void) | null = null
   constructor(private transport: Transport) {}
 
   init(): void {
-    this.setupGlobalErrorHandler()
-    this.setupUnhandledRejectionHandler()
-    this.setupConsoleErrorHandler()
-    this.setupResourceErrorHandler()
+    this.setupGlobalErrorHandler() // JS运行异常及资源异常
+    this.setupUnhandledRejectionHandler() // Promise异常
   }
 
   private setupGlobalErrorHandler(): void {
-    window.addEventListener(
-      'error',
-      event => {
-        // 获取最后一个用户操作事件和最近事件序列
-        const lastEvent = getLastEvent()
-        const recentEvents = getRecentEvents(3)
+    this.globalErrorHandler = (event: ErrorEvent) => {
+      const target = event.target as HTMLElement | Window | null
+      if (target && target !== window && (target as HTMLElement).nodeType === Node.ELEMENT_NODE) {
+        this.handleResourceError(event, target as HTMLElement)
+        return
+      }
+      this.handleJsRuntimeError(event)
+    }
+    window.addEventListener('error', this.globalErrorHandler, true)
+  }
 
-        const errorInfo = {
-          event_type: 'error',
-          type: 'js_runtime_error',
-          message: event.message,
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-          error_type: event.error?.name,
-          stack: event.error?.stack,
-          path: window.location.pathname,
-          timestamp: Date.now(),
-          user_agent: navigator.userAgent,
-          framework: 'native',
-          // 事件上下文信息
-          event_context: this.getEventContext(lastEvent, recentEvents)
-        }
+  private handleJsRuntimeError(event: ErrorEvent) {
+    // 获取最后一个用户操作事件和最近事件序列
+    const lastEvent = getLastEvent()
+    const recentEvents = getRecentEvents(3)
 
-        this.transport.send(errorInfo)
-      },
-      true
-    )
+    const errorInfo = {
+      event_type: 'error',
+      type: 'js_runtime_error',
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error_type: event.error?.name,
+      stack: event.error?.stack,
+      path: window.location.pathname,
+      timestamp: Date.now(),
+      user_agent: navigator.userAgent,
+      framework: 'native',
+      // 事件上下文信息
+      event_context: this.getEventContext(lastEvent, recentEvents)
+    }
+
+    this.transport.send(errorInfo)
+  }
+
+  private handleResourceError(event: ErrorEvent, target: HTMLElement) {
+    const lastEvent = getLastEvent()
+    const recentEvents = getRecentEvents(3)
+
+    this.transport.send({
+      event_type: 'error',
+      type: 'resource_load_error',
+      message: `获取${target.tagName}资源失败`,
+      tag_name: target.tagName,
+      resource_url: this.getResourceUrl(target),
+      path: window.location.pathname,
+      timestamp: Date.now(),
+      event_context: this.getEventContext(lastEvent, recentEvents)
+    })
   }
 
   private setupUnhandledRejectionHandler(): void {
-    window.addEventListener('unhandledrejection', event => {
+    this.rejectionHandler = (event: PromiseRejectionEvent) => {
       const lastEvent = getLastEvent()
       const recentEvents = getRecentEvents(3)
 
@@ -86,62 +107,13 @@ export class Errors implements Integration {
         type: 'unhandled_rejection',
         message: event.reason?.message || String(event.reason),
         stack: event.reason?.stack,
-        reason: this.serializeError(event.reason),
-        path: window.location.pathname,
-        timestamp: Date.now(),
-        event_context: this.getEventContext(lastEvent, recentEvents)
-      })
-    })
-  }
-
-  private setupResourceErrorHandler(): void {
-    window.addEventListener(
-      'error',
-      event => {
-        const target = event.target as HTMLElement
-
-        if (target && target !== window && target.nodeType === 1) {
-          const lastEvent = getLastEvent()
-          const recentEvents = getRecentEvents(3)
-
-          const resourceInfo = {
-            event_type: 'error',
-            type: 'resource_load_error',
-            tag_name: target.tagName,
-            resource_url: this.getResourceUrl(target),
-            path: window.location.pathname,
-            timestamp: Date.now(),
-            event_context: this.getEventContext(lastEvent, recentEvents)
-          }
-
-          this.transport.send(resourceInfo)
-        }
-      },
-      true
-    )
-  }
-
-  private setupConsoleErrorHandler(): void {
-    this.originalConsoleError = console.error
-
-    console.error = (...args: any[]) => {
-      this.originalConsoleError?.apply(console, args)
-
-      const lastEvent = getLastEvent()
-      const recentEvents = getRecentEvents(3)
-
-      this.transport.send({
-        event_type: 'error',
-        type: 'console_error',
-        messages: args.map(arg => this.serializeError(arg)),
-        stack: new Error().stack,
         path: window.location.pathname,
         timestamp: Date.now(),
         event_context: this.getEventContext(lastEvent, recentEvents)
       })
     }
+    window.addEventListener('unhandledrejection', this.rejectionHandler)
   }
-
   /**
    * 获取事件上下文信息
    */
@@ -154,50 +126,13 @@ export class Errors implements Integration {
     if (lastEvent) {
       context.last_event = {
         type: lastEvent.type,
-        target: this.getElementSelector(lastEvent.target as Element),
+        target: getElementSelector(lastEvent.target as HTMLElement),
         paths: getPaths(lastEvent),
         timestamp: Date.now() // 这里可以改进为实际事件时间
       }
     }
 
     return context
-  }
-
-  /**
-   * 获取元素选择器
-   */
-  private getElementSelector(element: Element | null): string {
-    if (!element) return ''
-
-    let selector = element.tagName.toLowerCase()
-
-    if (element.id) {
-      selector += `#${element.id}`
-    }
-
-    if (element.className && typeof element.className === 'string') {
-      const classNames = element.className
-        .split(/\s+/)
-        .filter(className => className.trim())
-        .map(className => className.replace(/[^a-zA-Z0-9-_]/g, ''))
-
-      if (classNames.length > 0) {
-        selector += `.${classNames.join('.')}`
-      }
-    }
-
-    return selector
-  }
-
-  private serializeError(error: any): any {
-    if (error instanceof Error) {
-      return {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      }
-    }
-    return error
   }
 
   private getResourceUrl(element: HTMLElement): string {
@@ -208,5 +143,16 @@ export class Errors implements Integration {
       return element.src
     }
     return ''
+  }
+
+  destroy() {
+    if (this.globalErrorHandler) {
+      window.removeEventListener('error', this.globalErrorHandler)
+      this.globalErrorHandler = null
+    }
+    if (this.rejectionHandler) {
+      window.removeEventListener('unhandledrejection', this.rejectionHandler)
+      this.rejectionHandler = null
+    }
   }
 }

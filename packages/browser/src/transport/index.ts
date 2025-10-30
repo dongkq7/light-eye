@@ -57,10 +57,7 @@ export class BrowserTransport extends BaseTransport {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-
-      console.log(`✅ 成功发送 ${data.length} 条${type}数据`)
     } catch (error) {
-      console.error('上报失败:', error)
       this.handleRetry(data, type)
     } finally {
       this.isSending = false

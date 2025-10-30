@@ -7,7 +7,14 @@
     <title>vanilla</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- 异常测试按钮组 -->
+      <div class="error-test-group">
+        <button id="js-error-btn" class="error-btn">触发JS运行时异常</button>
+        <button id="resource-error-btn" class="error-btn">触发资源加载异常</button>
+        <button id="promise-error-btn" class="error-btn">触发Promise异常</button>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

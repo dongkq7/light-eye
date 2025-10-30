@@ -108,7 +108,6 @@ class EventTracker {
     if (!this.config.enabled) return []
 
     this.cleanupExpiredEvents()
-
     return this.lastEvents.slice(0, limit).map(item => ({
       type: item.event.type,
       timestamp: item.timestamp,

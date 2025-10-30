@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "jest.config.js"],
+  "exclude": ["src/**/__test__/**"],
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["jest", "node"],
     "lib": ["DOM", "ESNext"]
   }
 }
