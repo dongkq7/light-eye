@@ -1,7 +1,7 @@
 import './style.css'
 import { init } from '@light-eye/browser'
 
-init({ dsn: 'http://test/api' })
+init({ dsn: 'YOUR DSN' })
 
 // 异常测试逻辑
 function setupErrorTests() {

@@ -67,7 +67,8 @@ const ignores = [
   'eslint.config.mjs',
   'apps/frontend/monitor/src/components/ui/**/*',
   'coverage/', // 忽略根目录 coverage
-  'packages/**/coverage/' // 忽略子包 coverage
+  'packages/**/coverage/', // 忽略子包 coverage
+  'demos/**'
 ]
 
 export default tseslint.config(

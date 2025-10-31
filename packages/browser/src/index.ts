@@ -1,7 +1,7 @@
 import { Monitor, MonitorOptions } from '@light-eye/core'
 import { BrowserTransport } from './transport'
 import { Errors } from './tracing/errors'
-import { initEventTracker } from '@light-eye/browser-utils'
+import { EventTracker, initEventTracker } from '@light-eye/browser-utils'
 import { Metrics } from './tracing/metrics'
 
 export const init = (options: MonitorOptions) => {
@@ -34,7 +34,8 @@ export const init = (options: MonitorOptions) => {
 
   return {
     monitor,
-    eventTracker
+    eventTracker,
+    transport
   }
 }
 
