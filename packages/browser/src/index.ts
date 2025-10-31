@@ -2,6 +2,7 @@ import { Monitor, MonitorOptions } from '@light-eye/core'
 import { BrowserTransport } from './transport'
 import { Errors } from './tracing/errors'
 import { initEventTracker } from '@light-eye/browser-utils'
+import { Metrics } from './tracing/metrics'
 
 export const init = (options: MonitorOptions) => {
   if (!options.dsn) {
@@ -29,8 +30,7 @@ export const init = (options: MonitorOptions) => {
   new Errors(transport).init()
 
   // 性能采集
-  // TODO
-  // new Metrics(transport).init()
+  new Metrics(transport).init()
 
   return {
     monitor,
