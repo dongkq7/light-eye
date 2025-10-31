@@ -74,8 +74,8 @@ class CachePool implements ICachePool {
     return Array.from(this.cache.values()).reduce((total, arr) => total + arr.length, 0)
   }
 
-  getAllCacheData(): any[] {
-    return Array.from(this.cache.values()).flat()
+  getAllCacheData(): Array<[any, any[]]> {
+    return Array.from(this.cache.entries())
   }
 }
 

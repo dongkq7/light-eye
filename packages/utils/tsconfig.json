@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "include": ["src/**/*", "../browser-utils/src/eventTracker.ts"],
+  "exclude": ["src/**/__test__/**"],
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["jest", "node"],
     "lib": ["DOM", "ESNext"]
   }
 }

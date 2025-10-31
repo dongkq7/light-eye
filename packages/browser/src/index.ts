@@ -18,9 +18,9 @@ export const init = (options: MonitorOptions) => {
 
   const transport = new BrowserTransport({
     dsn: options.dsn,
-    useBatch: options.transportOptions?.useBatch,
-    bufferSize: options.transportOptions?.bufferSize,
-    bufferDelay: options.transportOptions?.bufferDelay
+    useBatch: options.transportOptions?.useBatch || true,
+    bufferSize: options.transportOptions?.bufferSize || 10,
+    lazyTimeout: options.transportOptions?.lazyTimeout || 3000
   })
 
   monitor.init(transport)

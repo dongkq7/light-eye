@@ -8,8 +8,7 @@ export interface MonitorOptions {
 export interface TransportOptions {
   dsn: string
   bufferSize?: number // 批量发送阈值
-  bufferDelay?: number // 批量发送延迟事件
-  maxRetries?: number // 最大重试次数
+  lazyTimeout?: number // 批量发送延迟事件
   useBatch?: boolean // 是否批量发送
 }
 
@@ -22,7 +21,6 @@ export interface EventTrackerConfig {
 
 export interface Transport {
   send(data: any): void
-  flush(): Promise<void>
   destroy(): void
 }
 
