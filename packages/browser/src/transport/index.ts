@@ -112,21 +112,21 @@ export class BrowserTransport implements Transport {
    * 使用 sendBeacon 发送
    */
   private sendBeacon(data: any): void {
-    // if (navigator.sendBeacon) {
-    //   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
-    //   navigator.sendBeacon(this.options.dsn, blob)
-    // } else {
-    //   this.sendWithXHR(data)
-    // }
-    fetch(this.options.dsn, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).catch(error => {
-      console.error('上报失败:', error)
-    })
+    if (navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+      navigator.sendBeacon(this.options.dsn, blob)
+    } else {
+      this.sendWithXHR(data)
+    }
+    // fetch(this.options.dsn, {
+    //   method: 'POST',
+    //   body: JSON.stringify(data),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // }).catch(error => {
+    //   console.error('上报失败:', error)
+    // })
   }
 
   /**

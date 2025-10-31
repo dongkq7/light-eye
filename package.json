@@ -12,7 +12,8 @@
     "prepare": "husky",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",
-    "test:coverage": "pnpm -r test:coverage"
+    "test:coverage": "pnpm -r test:coverage",
+    "docker:start": "docker compose -p light-eye -f .dccontainer/docker-compose.yml up -d"
   },
   "config": {
     "commitizen": {

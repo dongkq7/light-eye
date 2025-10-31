@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  light-eye-monitor-clickhouse:
+    image: clickhouse:latest
+    container_name: light-eye-monitor-clickhouse
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+    environment:
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=123456
+      - CLICKHOUSE_DATABASE=default
+
+networks:
+  default:
+    name: light-eye-monitor-network
+    driver: bridge
