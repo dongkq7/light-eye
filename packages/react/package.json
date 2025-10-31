@@ -1,7 +1,7 @@
 {
-  "name": "@light-eye/vue",
+  "name": "@light-eye/react",
   "version": "1.0.0",
-  "description": "vue项目适配包",
+  "description": "react项目适配包",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.mjs",
   "types": "build/types/index.d.ts",
@@ -31,7 +31,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.13.1",
   "peerDependencies": {
-    "vue": "^3.0.0"
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
+    "@types/react": ">=16.8.0",
+    "@types/react-dom": ">=16.8.0"
   },
   "dependencies": {
     "@light-eye/core": "workspace:*",

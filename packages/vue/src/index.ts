@@ -3,6 +3,7 @@ import { init as initBrowserMonitor } from '@light-eye/browser'
 import { Monitor, MonitorOptions, Transport } from '@light-eye/core'
 import { App } from 'vue'
 
+let initialized = false
 function isError(value: unknown): value is Error {
   return value instanceof Error
 }
@@ -51,26 +52,26 @@ function installVueMonitor(app: App, transport: Transport) {
   }
 }
 
-export function init(options: MonitorOptions): {
-  VueLightEye: { install: (app: App) => void }
-  monitor: Monitor | null
-} {
+const VueLightEye = {
+  install(app: App, options: MonitorOptions) {
+    return init(app, options)
+  }
+}
+
+function init(app: App, options: MonitorOptions) {
+  if (initialized) return
   const { monitor, transport } = initBrowserMonitor(options) ?? {}
   if (!monitor || !transport) {
     console.error('🔨 LightEye start error, please check config...')
     return {
-      VueLightEye: { install: () => {} },
       monitor: null
     }
   }
-  const VueLightEye = {
-    install(app: App) {
-      installVueMonitor(app, transport)
-    }
-  }
-
+  installVueMonitor(app, transport)
+  initialized = true
   return {
-    VueLightEye,
     monitor
   }
 }
+
+export default VueLightEye

@@ -1,11 +1,8 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import { init } from '@light-eye/vue'
+import VueLightEye from '@light-eye/vue'
 
-const { VueLightEye } = init({
-  dsn: 'your dsn'
-})
 const app = createApp(App)
-app.use(VueLightEye)
+app.use(VueLightEye, { dsn: 'your dsn' })
 app.mount('#app')
