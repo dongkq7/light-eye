@@ -6,14 +6,19 @@
   "scripts": {
     "lint:prettier": "prettier --write \"**/*.{js,ts,mjs,cjs,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:eslint": "eslint apps/ packages/ --fix --ext .js,.ts,.mjs,.cjs,.tsx,.vue  --ignore-pattern '**/*.d.ts' --ignore-pattern 'packages/core/build/types/**/*'",
-    "spellcheck": "cspell lint --no-progress --show-suggestions --no-summary --no-color --exclude '**/coverage/**/*' \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,tsx,css,less,scss,vue,html,md}\"",
+    "spellcheck": "cspell lint --no-progress --show-suggestions --no-summary --no-color --exclude '**/coverage/**/*' --exclude '**/components/ui/**/*' \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,tsx,css,less,scss,vue,html,md}\"",
     "lint": "pnpm lint:prettier & pnpm lint:eslint & pnpm spellcheck",
     "commit": "git-cz",
     "prepare": "husky",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",
     "test:coverage": "pnpm -r test:coverage",
-    "docker:start": "docker compose -p light-eye -f .dccontainer/docker-compose.yml up -d"
+    "docker:start": "docker compose -p light-eye -f .dccontainer/docker-compose.yml up -d",
+    "build:watch": "turbo build:watch",
+    "build:lib": "turbo build:lib",
+    "build:server": "turbo build:server",
+    "start:dev": "turbo start:dev",
+    "dev": "turbo dev"
   },
   "config": {
     "commitizen": {
@@ -49,6 +54,7 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.5",
     "tsup": "^8.5.0",
+    "turbo": "^2.6.0",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0"
   }

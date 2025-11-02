@@ -1,18 +1,26 @@
 import { Login } from '@/pages/login'
 import { createBrowserRouter } from 'react-router'
+import AuthRoute from './AuthRoute'
+import { Layout } from '@/layout'
+import { Issues } from '@/pages/issues'
+import { Projects } from '@/pages/projects'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <div>根目录</div>,
+    element: (
+      <AuthRoute>
+        <Layout></Layout>
+      </AuthRoute>
+    ),
     children: [
       {
         path: 'projects',
-        element: <div>projects</div>
+        element: <Projects></Projects>
       },
       {
         path: 'issues',
-        element: <div>issues</div>
+        element: <Issues></Issues>
       }
     ]
   },

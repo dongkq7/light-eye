@@ -55,6 +55,14 @@ const frontendConfig = {
   }
 }
 
+// 为 shadcn/ui 组件创建特殊配置，禁用 react-refresh 规则
+const shadcnConfig = {
+  files: ['apps/frontend/monitor/src/components/ui/**/*.{js,ts,jsx,tsx}'],
+  rules: {
+    'react-refresh/only-export-components': 'off' // 完全关闭这个规则
+  }
+}
+
 // 后端配置
 const backendConfig = {
   files: ['apps/backend/**/*.{js,ts}'],
@@ -90,6 +98,7 @@ export default tseslint.config(
   },
   // 前端配置
   frontendConfig,
+  shadcnConfig,
   // 后端配置
   backendConfig
 )

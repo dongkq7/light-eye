@@ -24,20 +24,20 @@ export interface CurrentUserRes {
 /**
  * 用户登录
  */
-export const login = async (data: LoginPayload) => {
-  return await request.post<LoginRes>('/auth/login', data)
+export const login = (data: LoginPayload) => {
+  return request.post<LoginRes>('/auth/login', data)
 }
 
 /**
  * 获取当前用户信息
  */
-export const currentUser = async () => {
-  return await request.get<CurrentUserRes>('/auth/whoami')
+export const currentUser = () => {
+  return request.get<CurrentUserRes>('/auth/whoami')
 }
 
 /**
  * 用户注册
  */
-export const register = async (data: { username: string; password: string }) => {
-  return await request.post('/admin/register', data)
+export const register = (data: { username: string; password: string }) => {
+  return request.post('/admin/register', data)
 }

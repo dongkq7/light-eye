@@ -22,7 +22,7 @@ export class StorageService {
     return json.data
   }
 
-  async tracing(body: any) {
+  async tracing(app_id: string, body: any) {
     const reportData = Array.isArray(body.data) ? body.data[0] : []
     const commonItem: Record<string, any> = {}
     Object.keys(body).forEach(key => {
@@ -34,7 +34,7 @@ export class StorageService {
       // 若 item 不是对象，转为对象（避免非对象类型导致的合并问题）
       const itemObj = typeof item === 'object' && item !== null ? item : { value: item }
       return {
-        app_id: body.app_id || '1',
+        app_id: app_id || '1',
         event_type: body.event_type || 'unknown',
         message: body.message,
         info: { ...commonItem, ...itemObj }
@@ -46,5 +46,14 @@ export class StorageService {
       values: formatData,
       format: 'JSONEachRow'
     })
+  }
+
+  async bugs() {
+    const res = await this.clickhouseClient.query({
+      query: `SELECT * FROM monitor_view WHERE event_type='error';`,
+      format: 'JSON'
+    })
+    const queryResult = await res.json()
+    return queryResult.data
   }
 }

@@ -1,3 +1,4 @@
+import { request } from '@/service'
 /**
  * 应用相关
  */
@@ -28,4 +29,18 @@ export interface ApplicationListRes {
 export interface CreateApplicationPayload {
   name: string
   type: ApplicationType
+}
+
+/**
+ * 获取应用列表
+ */
+export const fetchApplicationList = (): Promise<ApplicationListRes> => {
+  return request.get('/application')
+}
+
+/**
+ * 创建应用
+ */
+export const createApplication = (data: CreateApplicationPayload) => {
+  return request.post('/application', data)
 }

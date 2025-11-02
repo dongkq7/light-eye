@@ -26,28 +26,6 @@ export function Login() {
     }
   })
 
-  // const handleSubmit = async (values: CreateUserPayload) => {
-  //   try {
-  //     const res = await login({
-  //       ...values
-  //     })
-
-  //     if (!res.data) {
-  //       toast.error('请稍后重试！')
-  //       return
-  //     }
-
-  //     toast.success('登录成功！')
-
-  //     localStorage.setItem('token', res.data.access_token)
-
-  //     const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/projects'
-  //     navigate(redirectUrl)
-  //   } catch (err) {
-  //     toast.error(`登录失败，用户名或密码错误，请重试`)
-  //   }
-  // }
-
   return (
     <div className="container relative h-screen w-full flex items-center justify-center max-w-none">
       <div>
