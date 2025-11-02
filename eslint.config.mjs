@@ -6,10 +6,23 @@ import eslintPluginVue from 'eslint-plugin-vue'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
+const ignores = [
+  'dist',
+  'node_modules',
+  'build',
+  '**/*.js',
+  '**/*.mjs',
+  '**/*.d.ts',
+  'eslint.config.mjs',
+  'apps/frontend/monitor/src/components/ui/**/*',
+  'coverage/', // 忽略根目录 coverage
+  'packages/**/coverage/', // 忽略子包 coverage
+  'demos/**'
+]
+
 // 前端配置
 const frontendConfig = {
   files: ['apps/frontend/monitor/**/*.{js,ts,vue,jsx,tsx}'], // 检查范围
-  ignores: ['apps/frontend/monitor/src/components/ui/**/*'], // 忽略检查
   extends: [...eslintPluginVue.configs['flat/recommended']], // 继承配置
   languageOptions: {
     ecmaVersion: 2020,
@@ -56,20 +69,6 @@ const backendConfig = {
     'no-undef': 'error'
   }
 }
-
-const ignores = [
-  'dist',
-  'node_modules',
-  'build',
-  '**/*.js',
-  '**/*.mjs',
-  '**/*.d.ts',
-  'eslint.config.mjs',
-  'apps/frontend/monitor/src/components/ui/**/*',
-  'coverage/', // 忽略根目录 coverage
-  'packages/**/coverage/', // 忽略子包 coverage
-  'demos/**'
-]
 
 export default tseslint.config(
   // 通用配置

@@ -6,6 +6,7 @@ import { ApplicationModule } from './application/application.module'
 import { AdminModule } from './admin/admin.module'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthModule } from './auth/auth.module'
+import { APP_GUARD } from '@nestjs/core'
 
 @Module({
   imports: [

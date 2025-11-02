@@ -18,7 +18,7 @@ export class AuthController {
       username: req.user.username
     })
     return {
-      token
+      access_token: token
     }
   }
 
