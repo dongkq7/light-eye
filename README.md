@@ -5,6 +5,7 @@ LightEye — 前端监控与可观测性平台
 Light Eye 是一套前端监控解决方案，覆盖“前端 SDK 采集 + 上报传输 + 后端存储与查询 + 管理后台展示”的完整链路。
 
 核心能力：
+
 - 错误监控：JS 运行时错误、资源加载错误、Promise 未捕获异常、React 错误边界
 - 性能监控：Web Vitals（CLS/FCP/INP/LCP/TTFB）、FP、DOM Ready、Load、Navigation/网络阶段耗时
 - 用户行为追踪：最近操作事件序列与最后一次交互上下文（辅助复现问题）
@@ -12,6 +13,7 @@ Light Eye 是一套前端监控解决方案，覆盖“前端 SDK 采集 + 上�
 - 管理后台：项目管理、错误列表与图表可视化
 
 技术栈：
+
 - 前端 SDK：TypeScript、插件化架构（packages/core、browser、react、vue、browser-utils、utils）
 - 管理后台：React + Vite + React Query + shadcn/ui + Recharts
 - 后端服务：NestJS（apps/backend），PostgreSQL（项目/用户等关系数据）、ClickHouse（监控事件/埋点时序数据）
@@ -83,6 +85,7 @@ pnpm --filter monitor dev
 ```
 
 默认代理与接口：
+
 - 管理后台请求基础地址：`/api`（apps/backend/monitor-server）
 - 监控上报 DSN：`/dsn-api`（apps/backend/dsn-server）
 
@@ -100,13 +103,13 @@ const { monitor, transport, eventTracker } = init({
   transportOptions: {
     useBatch: true,
     bufferSize: 10,
-    lazyTimeout: 3000,
+    lazyTimeout: 3000
   },
   eventTracker: {
     enabled: true,
     maxEvents: 10,
-    timeout: 5000,
-  },
+    timeout: 5000
+  }
 })
 ```
 
@@ -127,6 +130,7 @@ function AppRoot() {
 ## 管理后台接口封装
 
 管理后台统一使用二次封装的 Axios：
+
 - 双实例：`request`（业务 API）与 `dsnRequest`（埋点上报域）
 - 统一错误模型 `RequestError` 与业务码校验
 - Token 注入与自动刷新、并发刷新排队
@@ -137,11 +141,13 @@ function AppRoot() {
 ## 数据库与配置（开发默认）
 
 monitor-server（PostgreSQL）：`apps/backend/monitor-server/src/app.module.ts`
+
 ```
 type: 'postgres', host: 'localhost', username: 'postgres', password: '123456', database: 'postgres'
 ```
 
 dsn-server（ClickHouse）：`apps/backend/dsn-server/src/app.module.ts`
+
 ```
 url: 'http://localhost:8123', username: 'default', password: '123456'
 ```
